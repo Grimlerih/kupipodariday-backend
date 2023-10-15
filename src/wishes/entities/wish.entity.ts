@@ -1,6 +1,6 @@
 import { Entity, Column } from 'typeorm';
 import { Base } from '../../entity/base.entity';
-import { Length, IsEmail, IsUrl } from 'class-validator';
+import { Length, IsUrl } from 'class-validator';
 
 @Entity()
 export class Wish extends Base {
