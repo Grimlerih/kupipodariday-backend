@@ -1,6 +1,8 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Base } from '../../entity/base.entity';
 import { Length, IsUrl } from 'class-validator';
+import { User } from '../../users/entities/user.entity';
+import { Offer } from 'src/offers/entities/offer.entity';
 
 @Entity()
 export class Wish extends Base {
@@ -26,15 +28,15 @@ export class Wish extends Base {
   })
   raised: number;
 
-  @Column()
-  owner: string;
+  @ManyToOne(() => User, (user) => user.wishes)
+  owner: User;
 
   @Column()
   @Length(1, 1024)
   description: string;
 
-  @Column()
-  offers: string;
+  @OneToMany(() => Offer, (offer) => offer.item)
+  offers: Offer[];
 
   @Column()
   copied: string;

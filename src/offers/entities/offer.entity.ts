@@ -1,16 +1,16 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
 import { Base } from '../../entity/base.entity';
 import { Length, IsUrl, IsNumber, IsBoolean } from 'class-validator';
+import { User } from '../../users/entities/user.entity';
+import { Wish } from 'src/wishes/entities/wish.entity';
 
 @Entity()
 export class Offer extends Base {
-  @Column()
-  @Length(1, 250)
-  user: string;
+  @ManyToOne(() => User, (user) => user.offers)
+  user: User;
 
-  @Column()
-  @IsUrl()
-  item: string;
+  @ManyToOne(() => Wish, (wish) => wish.offers)
+  item: Wish;
 
   @Column({
     scale: 2,
