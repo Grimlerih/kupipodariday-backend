@@ -1,26 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { SignUpDto } from './dto/signup.dto';
+import { SignInDto } from './dto/signin.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Repository } from 'typeorm';
+import { ServerException } from 'src/exceptions/server.exception';
+import { ErrorCode } from 'src/exceptions/error-codes';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    @InjectRepository(User) private userRepository: Repository<User>,
+  ) {}
+
+  async signup(user: SignUpDto) {
+    const existUser = await this.userRepository.findOne({
+      where: { email: user.email },
+    });
+
+    if (existUser) throw new ServerException(ErrorCode.UserAlreadyExists);
+
+    return await this.userRepository.save(user);
   }
 
-  findAll() {
-    return `This action returns all auth`;
-  }
+  async signin(user: SignInDto) {
+    const checkUser = await this.userRepository.find({
+      where: {
+        username: user.username,
+        password: user.password,
+      },
+    });
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    return checkUser;
+    // if (checkUser) return this.userRepository.
   }
 }

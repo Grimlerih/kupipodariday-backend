@@ -1,6 +1,6 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { Base } from '../../entity/base.entity';
-import { Length, IsEmail, IsUrl } from 'class-validator';
+import { Length, IsEmail, IsUrl, IsOptional } from 'class-validator';
 import { Wish } from '../../wishes/entities/wish.entity';
 import { Offer } from '../../offers/entities/offer.entity';
 import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
@@ -13,9 +13,11 @@ export class User extends Base {
   @Length(2, 30)
   username: string;
 
-  @Column()
-  @Length(2, 200)
-  about: string;
+  @Column({
+    default: '',
+  })
+  @IsOptional()
+  about?: string;
 
   @Column({
     default: 'https://i.pravatar.cc/300',
