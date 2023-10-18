@@ -7,24 +7,30 @@ import {
   Param,
   Delete,
   UseFilters,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { SignUpDto } from './dto/signup.dto';
-import { SignInDto } from './dto/signin.dto';
 import { ServerExceptionFilter } from 'src/filter/server-exceptions.filter';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { UsersService } from 'src/users/users.service';
+import { AuthGuard } from '@nestjs/passport';
 
 @UseFilters(ServerExceptionFilter)
 @Controller()
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UsersService,
+  ) {}
 
   @Post('signup')
-  create(@Body() user: SignUpDto) {
-    return this.authService.signup(user);
+  create(@Body() user: CreateUserDto) {
+    return this.userService.create(user);
   }
 
+  @UseGuards(AuthGuard('local'))
   @Post('signin')
-  find(@Body() userAuth: SignInDto) {
+  find(@Body() userAuth) {
     return this.authService.signin(userAuth);
   }
 }

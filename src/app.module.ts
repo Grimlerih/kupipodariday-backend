@@ -8,6 +8,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import dbConfig from './config/db.config';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { HashModule } from './hash/hash.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       useFactory: dbConfig,
     }),
     AuthModule,
+    HashModule,
   ],
   controllers: [AppController],
   providers: [],
