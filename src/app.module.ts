@@ -5,27 +5,21 @@ import { OffersModule } from './offers/offers.module';
 import { UsersModule } from './users/users.module';
 import { WishlistsModule } from './wishlists/wishlists.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Offer } from './offers/entities/offer.entity';
-import { User } from './users/entities/user.entity';
-import { Wish } from './wishes/entities/wish.entity';
-import { Wishlist } from './wishlists/entities/wishlist.entity';
+import dbConfig from './config/db.config';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     WishesModule,
     OffersModule,
     UsersModule,
     WishlistsModule,
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'student',
-      password: 'student',
-      database: 'kupipodariday-base',
-      entities: [Offer, User, Wish, Wishlist],
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: dbConfig,
     }),
     AuthModule,
   ],
