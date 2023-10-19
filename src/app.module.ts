@@ -12,7 +12,7 @@ import { HashModule } from './hash/hash.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({ isGlobal: true }),
     WishesModule,
     OffersModule,
     UsersModule,
