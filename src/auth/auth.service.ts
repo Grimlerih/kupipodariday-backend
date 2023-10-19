@@ -16,6 +16,7 @@ export class AuthService {
     private hashService: HashService,
   ) {}
 
+  //войти
   async signin(user: User) {
     const payload = { sub: user.id };
 
