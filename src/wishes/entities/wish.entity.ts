@@ -25,6 +25,7 @@ export class Wish extends Base {
 
   @Column({
     scale: 2,
+    default: 0,
   })
   raised: number;
 
@@ -38,6 +39,6 @@ export class Wish extends Base {
   @OneToMany(() => Offer, (offer) => offer.item)
   offers: Offer[];
 
-  @Column()
-  copied: string;
+  @Column({ default: 0 })
+  copied: number;
 }
