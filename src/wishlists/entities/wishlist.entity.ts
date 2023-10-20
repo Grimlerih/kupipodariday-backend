@@ -14,7 +14,7 @@ export class Wishlist extends Base {
   @IsUrl()
   image: string;
 
-  @Column()
+  @Column({ default: 'Описание отсутствует' })
   @Length(1, 1500)
   description: string;
 
