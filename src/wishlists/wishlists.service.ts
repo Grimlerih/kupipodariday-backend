@@ -1,26 +1,58 @@
 import { Injectable } from '@nestjs/common';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Wishlist } from './entities/wishlist.entity';
+import { In, Repository } from 'typeorm';
+import { UsersService } from 'src/users/users.service';
+import { Wish } from 'src/wishes/entities/wish.entity';
 
 @Injectable()
 export class WishlistsService {
-  create(createWishlistDto: CreateWishlistDto) {
-    return 'This action adds a new wishlist';
+  constructor(
+    @InjectRepository(Wishlist)
+    private wishListReopsitory: Repository<Wishlist>,
+    @InjectRepository(Wish)
+    private wishReopsitory: Repository<Wish>,
+    private userService: UsersService,
+  ) {}
+
+  async create(createWishlistDto: CreateWishlistDto, ownerId: number) {
+    const { password, ...user } = await this.userService.findId(ownerId, false);
+
+    const { itemsId, ...wishlist } = createWishlistDto;
+
+    const items = await this.wishReopsitory.find({
+      where: {
+        id: In(itemsId),
+      },
+    });
+
+    return await this.wishListReopsitory.save({
+      ...wishlist,
+      items: items,
+      owner: user,
+    });
   }
 
-  findAll() {
-    return `This action returns all wishlists`;
+  async findAll() {
+    return this.wishListReopsitory.find({
+      relations: { owner: true, items: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} wishlist`;
+  async findById(wishlistId: number) {
+    return this.wishListReopsitory.findOne({
+      where: { id: wishlistId },
+      relations: ['items', 'owner'],
+    });
   }
 
-  update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
-  }
+  async delete(id: number) {
+    const wishList = await this.findById(id);
 
-  remove(id: number) {
-    return `This action removes a #${id} wishlist`;
+    await this.wishListReopsitory.delete(id);
+
+    return wishList;
   }
 }
