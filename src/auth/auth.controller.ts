@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseFilters,
+  Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -35,7 +36,7 @@ export class AuthController {
   //войти
   @UseGuards(AuthGuard('local'))
   @Post('signin')
-  find(@Body() userAuth) {
-    return this.authService.signin(userAuth);
+  find(@Request() { user }) {
+    return this.authService.signin(user);
   }
 }
