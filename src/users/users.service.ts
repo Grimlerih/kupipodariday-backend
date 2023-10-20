@@ -3,7 +3,7 @@ import { FindUserDto } from './dto/find-user.dto';
 // import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindOneOptions, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ServerException } from 'src/exceptions/server.exception';
 import { ErrorCode } from 'src/exceptions/error-codes';
@@ -41,8 +41,24 @@ export class UsersService {
   //   return existUser;
   // }
 
-  async findId(id: number) {
-    const existUser = await this.userRepository.findOneBy({ id });
+  // async findId(id: number) {
+  //   const existUser = await this.userRepository.findOne({
+  //     where: { id: id },
+  //     relations: { wishes: true },
+  //   });
+  //   return existUser;
+  // }
+
+  async findId(id: number, relations = true) {
+    const findOptions: FindOneOptions<User> = {
+      where: { id: id },
+    };
+
+    if (relations) {
+      findOptions.relations = ['wishes'];
+    }
+
+    const existUser = await this.userRepository.findOne(findOptions);
     return existUser;
   }
 
