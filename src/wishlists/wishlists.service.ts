@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wishlist } from './entities/wishlist.entity';
 import { In, Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { Wish } from 'src/wishes/entities/wish.entity';
+import { ServerException } from 'src/exceptions/server.exception';
+import { ErrorCode } from 'src/exceptions/error-codes';
 
 @Injectable()
 export class WishlistsService {
@@ -28,31 +29,49 @@ export class WishlistsService {
       },
     });
 
-    return await this.wishListReopsitory.save({
-      ...wishlist,
-      items: items,
-      owner: user,
-    });
+    if (items) {
+      return await this.wishListReopsitory.save({
+        ...wishlist,
+        items: items,
+        owner: user,
+      });
+    } else {
+      throw new ServerException(ErrorCode.WishlistNotFound);
+    }
   }
 
   async findAll() {
-    return this.wishListReopsitory.find({
-      relations: { owner: true, items: true },
+    const wishList = await this.wishListReopsitory.find({
+      relations: ['owner', 'items'],
     });
+
+    if (!wishList) {
+      throw new ServerException(ErrorCode.WishListError);
+    }
+
+    return wishList;
   }
 
   async findById(wishlistId: number) {
-    return this.wishListReopsitory.findOne({
+    const wishList = this.wishListReopsitory.findOne({
       where: { id: wishlistId },
       relations: ['items', 'owner'],
     });
+
+    if (!wishList) {
+      throw new ServerException(ErrorCode.WishListError);
+    }
+    return wishList;
   }
 
   async delete(id: number) {
     const wishList = await this.findById(id);
 
-    await this.wishListReopsitory.delete(id);
-
-    return wishList;
+    if (wishList) {
+      await this.wishListReopsitory.delete(id);
+      return wishList;
+    } else {
+      throw new ServerException(ErrorCode.WishListError);
+    }
   }
 }
