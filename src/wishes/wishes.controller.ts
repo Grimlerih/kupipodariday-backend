@@ -29,8 +29,11 @@ export class WishesController {
   }
 
   @Delete(':id')
-  delete(@Param('id') id: number): Promise<Wish> {
-    return this.wishesService.deleteWish(id);
+  delete(
+    @Param('id') wishId: number,
+    @Request() { user: { id } },
+  ): Promise<Wish> {
+    return this.wishesService.deleteWish(wishId, id);
   }
 
   @Post(':id/copy')

@@ -52,13 +52,17 @@ export class WishesService {
     return wish;
   }
 
-  async deleteWish(id: number) {
-    const wish = await this.findById(id, ['owner', 'offers', 'offers.user']);
-    if (wish) {
-      await this.wishRepository.delete(id);
+  async deleteWish(wishId: number, id: number) {
+    const wish = await this.findById(wishId, [
+      'owner',
+      'offers',
+      'offers.user',
+    ]);
+    if (wish.owner.id === id) {
+      await this.wishRepository.delete(wishId);
       return wish;
     } else {
-      throw new ServerException(ErrorCode.WishNotFound);
+      throw new ServerException(ErrorCode.WishDeleteError);
     }
   }
 
