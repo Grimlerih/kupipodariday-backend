@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { ServerException } from 'src/exceptions/server.exception';
 import { ErrorCode } from 'src/exceptions/error-codes';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt';
 import { HashService } from 'src/hash/hash.service';
 
 @Injectable()
