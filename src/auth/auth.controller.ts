@@ -1,24 +1,17 @@
 import {
   Controller,
-  Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
-  UseFilters,
   Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { ServerExceptionFilter } from 'src/filter/server-exceptions.filter';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { UsersService } from 'src/users/users.service';
 import { AuthGuard } from '@nestjs/passport';
 import { ExcludePasswordInterceptor } from 'src/interceptor/user-password.interceptor';
 
-@UseFilters(ServerExceptionFilter)
 @Controller()
 export class AuthController {
   constructor(
