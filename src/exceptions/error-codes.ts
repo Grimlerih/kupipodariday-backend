@@ -10,6 +10,8 @@ export enum ErrorCode {
   WishesNotFound = 106,
   WishListError = 106,
   WishlistNotFound = 107,
+  OfferError = 108,
+  WishDeleteError = 109,
 }
 
 export const code2message = new Map<ErrorCode, string>([
@@ -22,6 +24,8 @@ export const code2message = new Map<ErrorCode, string>([
   [ErrorCode.WishesNotFound, 'Ошибка подарки не найдены'],
   [ErrorCode.WishListError, 'Ошибка при запросе списка подарков'],
   [ErrorCode.WishlistNotFound, 'Список подарков не найден'],
+  [ErrorCode.OfferError, 'Нельзя подписаться на свой подарок'],
+  [ErrorCode.WishDeleteError, 'Нельзя удалить чужой подарок'],
 ]);
 
 export const code2status = new Map<ErrorCode, HttpStatus>([
@@ -34,4 +38,6 @@ export const code2status = new Map<ErrorCode, HttpStatus>([
   [ErrorCode.WishesNotFound, HttpStatus.BAD_REQUEST],
   [ErrorCode.WishListError, HttpStatus.BAD_REQUEST],
   [ErrorCode.WishlistNotFound, HttpStatus.NOT_FOUND],
+  [ErrorCode.OfferError, HttpStatus.BAD_REQUEST],
+  [ErrorCode.WishDeleteError, HttpStatus.BAD_REQUEST],
 ]);
