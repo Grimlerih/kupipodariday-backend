@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { UsersService } from 'src/users/users.service';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { WishesService } from 'src/wishes/wishes.service';
+import { ServerException } from 'src/exceptions/server.exception';
+import { ErrorCode } from 'src/exceptions/error-codes';
 
 @Injectable()
 export class OffersService {
@@ -27,11 +29,16 @@ export class OffersService {
       raised: raiseSum,
     });
 
-    return await this.offerRepository.save({
+    const save = await this.offerRepository.save({
       amount: createOfferDto.amount,
       hidden: createOfferDto.hidden,
       item: item,
       user: user,
     });
+
+    if (!save) {
+      throw new ServerException(ErrorCode.SaveError);
+    }
+    return save;
   }
 }
