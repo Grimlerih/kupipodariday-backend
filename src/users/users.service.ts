@@ -46,10 +46,12 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const hashedPassword = await this.hashService.hashPassword(
-      updateUserDto.password,
-    );
-    updateUserDto.password = hashedPassword;
+    if ('password' in updateUserDto) {
+      const hashedPassword = await this.hashService.hashPassword(
+        updateUserDto.password,
+      );
+      updateUserDto.password = hashedPassword;
+    }
 
     const updateUser = await this.userRepository.update(id, updateUserDto);
 

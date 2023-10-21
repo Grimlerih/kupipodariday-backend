@@ -14,7 +14,7 @@ import { AuthGuard } from '@nestjs/passport';
 import { Wishlist } from './entities/wishlist.entity';
 
 @UseGuards(AuthGuard('jwt'))
-@Controller('wishlists')
+@Controller('wishlistlists')
 export class WishlistsController {
   constructor(private readonly wishlistsService: WishlistsService) {}
 

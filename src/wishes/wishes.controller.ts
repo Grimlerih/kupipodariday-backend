@@ -23,11 +23,6 @@ export class WishesController {
     this.wishesService.create(id, createWishDto);
   }
 
-  @Get(':id')
-  find(@Param('id') id: number): Promise<Wish> {
-    return this.wishesService.findById(id, ['owner', 'offers', 'offers.user']);
-  }
-
   @Delete(':id')
   delete(
     @Param('id') wishId: number,
@@ -49,5 +44,10 @@ export class WishesController {
   @Get('top')
   getTop(): Promise<Wish[]> {
     return this.wishesService.findTop();
+  }
+
+  @Get(':id')
+  find(@Param('id') id: number): Promise<Wish> {
+    return this.wishesService.findById(id, ['owner', 'offers', 'offers.user']);
   }
 }
