@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { FindUserDto } from './dto/find-user.dto';
-// import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { FindOneOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ServerException } from 'src/exceptions/server.exception';
 import { ErrorCode } from 'src/exceptions/error-codes';
@@ -22,7 +20,9 @@ export class UsersService {
       where: { email: user.email },
     });
 
-    if (existUser) throw new ServerException(ErrorCode.UserAlreadyExists);
+    if (existUser) {
+      throw new ServerException(ErrorCode.UserAlreadyExists);
+    }
 
     const hashedPassword = await this.hashService.hashPassword(user.password);
     user.password = hashedPassword;
@@ -30,41 +30,28 @@ export class UsersService {
     return await this.userRepository.save(user);
   }
 
-  findAll() {
-    return this.userRepository.find();
-  }
-
-  // async findOne(query) {
-  //   const existUser = await this.userRepository.findOne({
-  //     where: [{ email: query }, { username: query }],
-  //   });
-  //   return existUser;
-  // }
-
-  // async findId(id: number) {
-  //   const existUser = await this.userRepository.findOne({
-  //     where: { id: id },
-  //     relations: { wishes: true },
-  //   });
-  //   return existUser;
-  // }
-
   async findId(id: number, relations = true) {
-    const findOptions: FindOneOptions<User> = {
-      where: { id: id },
+    const findOptions = {
+      where: { id },
+      ...(relations ? { relations: ['wishes'] } : {}),
     };
 
-    if (relations) {
-      findOptions.relations = ['wishes'];
+    const user = await this.userRepository.findOne(findOptions);
+
+    if (!user) {
+      throw new ServerException(ErrorCode.UserNotFound);
     }
 
-    const existUser = await this.userRepository.findOne(findOptions);
-    return existUser;
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    await this.userRepository.update(id, updateUserDto);
-    return this.findId(id);
+    const updateUser = await this.userRepository.update(id, updateUserDto);
+
+    if (!updateUser) {
+      throw new ServerException(ErrorCode.UpdateError);
+    }
+    return await this.findId(id);
   }
 
   async getMyWishes(id: number) {
@@ -74,28 +61,46 @@ export class UsersService {
         wishes: { owner: true, offers: true },
       },
     });
+
+    if (!user) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+
     return user.wishes;
   }
 
   async findUserName(name: string) {
     const user = await this.findUser(name);
+
+    if (!user) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+
     return user;
   }
 
   async findUserNameWishes(name: string) {
-    const userWishes = await this.userRepository.findOne({
+    const { wishes } = await this.userRepository.findOne({
       where: { username: name },
-      relations: {
-        offers: { user: true, item: true },
-      },
+      relations: ['wishes', 'wishes.offers', 'wishes.offers.user'],
     });
-    return userWishes.offers;
+
+    if (!wishes) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+
+    return wishes;
   }
 
   async findUser(query: string) {
     const existUser = await this.userRepository.findOne({
       where: [{ email: query }, { username: query }],
     });
+
+    if (!existUser) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+
     return existUser;
   }
 }
