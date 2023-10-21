@@ -21,7 +21,13 @@ export class OffersService {
   async create(createOfferDto: CreateOfferDto, id: number) {
     const user = await this.userService.findId(id, false);
 
-    const item = await this.wishService.findById(createOfferDto.itemId);
+    const item = await this.wishService.findById(createOfferDto.itemId, [
+      'owner',
+    ]);
+
+    if (user.id === item.owner.id) {
+      throw new ServerException(ErrorCode.OfferError);
+    }
 
     const raiseSum = Number((item.raised + createOfferDto.amount).toFixed(2));
 
