@@ -24,10 +24,11 @@ export class WishesService {
     return await this.wishRepository.save({ ...createWishDto, owner: user });
   }
 
-  async findById(id: number) {
+  async findById(id: number, relationLoad: string[] = []) {
     const wish = await this.wishRepository.findOne({
       where: { id: id },
-      relations: { owner: true, offers: true },
+      // relations: { owner: true, offers: true },
+      relations: relationLoad,
     });
     return wish;
   }
@@ -44,7 +45,7 @@ export class WishesService {
   // }
 
   async deleteWish(id: number) {
-    const wish = await this.findById(id);
+    const wish = await this.findById(id, ['owner', 'offers']);
     if (wish) {
       await this.wishRepository.delete(id);
       return wish;
@@ -63,6 +64,33 @@ export class WishesService {
       user.wishes.push(wish);
     }
 
+    await this.wishRepository.update(wishId, {
+      copied: wish.copied + 1,
+    });
+
     return this.userRepository.save(user);
+  }
+
+  async raisedUpdate(id: number, updateData: any) {
+    const wish = await this.wishRepository.update(id, updateData);
+    return wish;
+  }
+
+  async findTop() {
+    const wishes = await this.wishRepository.find({
+      order: { copied: 'desc' },
+      take: 20,
+    });
+
+    return wishes;
+  }
+
+  async findLast() {
+    const wishes = await this.wishRepository.find({
+      order: { createdAt: 'desc' },
+      take: 40,
+    });
+
+    return wishes;
   }
 }
