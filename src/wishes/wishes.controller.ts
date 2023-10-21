@@ -43,4 +43,14 @@ export class WishesController {
   copy(@Param('id') wishId: number, @Request() { user: { id } }) {
     return this.wishesService.copyWish(wishId, id);
   }
+
+  @Get('last')
+  getLast() {
+    return this.wishesService.findLast();
+  }
+
+  @Get('top')
+  getTop() {
+    return this.wishesService.findTop();
+  }
 }
