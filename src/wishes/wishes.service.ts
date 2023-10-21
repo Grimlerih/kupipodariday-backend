@@ -10,6 +10,8 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Wish } from './entities/wish.entity';
 import { User } from 'src/users/entities/user.entity';
+import { ServerException } from 'src/exceptions/server.exception';
+import { ErrorCode } from 'src/exceptions/error-codes';
 
 @Injectable()
 export class WishesService {
@@ -21,36 +23,42 @@ export class WishesService {
 
   async create(ownerId: number, createWishDto: CreateWishDto) {
     const { password, ...user } = await this.usersService.findId(ownerId);
-    return await this.wishRepository.save({ ...createWishDto, owner: user });
+
+    if (!user) {
+      throw new ServerException(ErrorCode.UserNotFound);
+    }
+
+    const wish = await this.wishRepository.save({
+      ...createWishDto,
+      owner: user,
+    });
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.SaveError);
+    }
+
+    return wish;
   }
 
   async findById(id: number, relationLoad: string[] = []) {
     const wish = await this.wishRepository.findOne({
       where: { id: id },
-      // relations: { owner: true, offers: true },
       relations: relationLoad,
     });
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.WishNotFound);
+    }
     return wish;
   }
 
-  // async updateWish(wishId: number , ownerId: number, updateDto: any) {
-  //   const wish = await this.findById(wishId)
-
-  //   if (ownerId !== wish.owner.id){
-  //     throw new ForbiddenException('Можно обновлять только свои подарки');
-  //   }
-
-  //   return this.wishRepository.update(wishId, updateDto)
-
-  // }
-
   async deleteWish(id: number) {
-    const wish = await this.findById(id, ['owner', 'offers']);
+    const wish = await this.findById(id, ['owner', 'offers', 'offers.user']);
     if (wish) {
       await this.wishRepository.delete(id);
       return wish;
     } else {
-      throw new NotFoundException('Указанный подарок не найден');
+      throw new ServerException(ErrorCode.WishNotFound);
     }
   }
 
@@ -58,21 +66,35 @@ export class WishesService {
     const wish = await this.wishRepository.findOne({
       where: { id: wishId },
     });
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.WishNotFound);
+    }
+
     const user = await this.usersService.findId(userId);
 
     if (wish && user) {
       user.wishes.push(wish);
     }
 
-    await this.wishRepository.update(wishId, {
+    const update = await this.wishRepository.update(wishId, {
       copied: wish.copied + 1,
     });
+
+    if (!update) {
+      throw new ServerException(ErrorCode.UpdateError);
+    }
 
     return this.userRepository.save(user);
   }
 
   async raisedUpdate(id: number, updateData: any) {
     const wish = await this.wishRepository.update(id, updateData);
+
+    if (!wish) {
+      throw new ServerException(ErrorCode.UpdateError);
+    }
+
     return wish;
   }
 
@@ -82,6 +104,10 @@ export class WishesService {
       take: 20,
     });
 
+    if (!wishes) {
+      throw new ServerException(ErrorCode.WishesNotFound);
+    }
+
     return wishes;
   }
 
@@ -90,6 +116,10 @@ export class WishesService {
       order: { createdAt: 'desc' },
       take: 40,
     });
+
+    if (!wishes) {
+      throw new ServerException(ErrorCode.WishesNotFound);
+    }
 
     return wishes;
   }

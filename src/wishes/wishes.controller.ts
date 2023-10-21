@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
@@ -11,8 +10,8 @@ import {
 } from '@nestjs/common';
 import { WishesService } from './wishes.service';
 import { CreateWishDto } from './dto/create-wish.dto';
-import { UpdateWishDto } from './dto/update-wish.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { Wish } from './entities/wish.entity';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('wishes')
@@ -21,36 +20,31 @@ export class WishesController {
 
   @Post()
   create(@Request() { user: { id } }, @Body() createWishDto: CreateWishDto) {
-    return this.wishesService.create(id, createWishDto);
+    this.wishesService.create(id, createWishDto);
   }
 
   @Get(':id')
-  find(@Param('id') id: number) {
-    return this.wishesService.findById(id);
+  find(@Param('id') id: number): Promise<Wish> {
+    return this.wishesService.findById(id, ['owner', 'offers', 'offers.user']);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') wishId: number, @Request(){ user: {id} }, @Body() updateDto: any ) {
-  //   return this.wishesService.updateWish(wishId,id, updateDto);
-  // }
-
   @Delete(':id')
-  delete(@Param('id') id: number) {
+  delete(@Param('id') id: number): Promise<Wish> {
     return this.wishesService.deleteWish(id);
   }
 
   @Post(':id/copy')
   copy(@Param('id') wishId: number, @Request() { user: { id } }) {
-    return this.wishesService.copyWish(wishId, id);
+    this.wishesService.copyWish(wishId, id);
   }
 
   @Get('last')
-  getLast() {
+  getLast(): Promise<Wish[]> {
     return this.wishesService.findLast();
   }
 
   @Get('top')
-  getTop() {
+  getTop(): Promise<Wish[]> {
     return this.wishesService.findTop();
   }
 }
