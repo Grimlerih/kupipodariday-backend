@@ -29,6 +29,10 @@ export class OffersService {
       throw new ServerException(ErrorCode.OfferError);
     }
 
+    if (createOfferDto.amount > item.price) {
+      throw new ServerException(ErrorCode.OfferPriceError);
+    }
+
     const raiseSum = Number((item.raised + createOfferDto.amount).toFixed(2));
 
     await this.wishService.raisedUpdate(createOfferDto.itemId, {

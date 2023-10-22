@@ -13,16 +13,16 @@ import { CreateWishDto } from './dto/create-wish.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Wish } from './entities/wish.entity';
 
-@UseGuards(AuthGuard('jwt'))
 @Controller('wishes')
 export class WishesController {
   constructor(private readonly wishesService: WishesService) {}
-
+  @UseGuards(AuthGuard('jwt'))
   @Post()
   create(@Request() { user: { id } }, @Body() createWishDto: CreateWishDto) {
     this.wishesService.create(id, createWishDto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   delete(
     @Param('id') wishId: number,
@@ -31,6 +31,7 @@ export class WishesController {
     return this.wishesService.deleteWish(wishId, id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Post(':id/copy')
   copy(@Param('id') wishId: number, @Request() { user: { id } }) {
     this.wishesService.copyWish(wishId, id);
@@ -46,6 +47,7 @@ export class WishesController {
     return this.wishesService.findTop();
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   find(@Param('id') id: number): Promise<Wish> {
     return this.wishesService.findById(id, ['owner', 'offers', 'offers.user']);
